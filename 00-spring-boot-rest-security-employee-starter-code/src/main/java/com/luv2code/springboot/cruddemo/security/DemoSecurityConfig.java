@@ -19,7 +19,20 @@ public class DemoSecurityConfig {
     //add support for JDBC, no more hardcoded users
     @Bean
     public UserDetailsManager userDetailsManager(DataSource dataSource) {
-        return new JdbcUserDetailsManager(dataSource);
+        JdbcUserDetailsManager jdbcUserDetailsManager = new JdbcUserDetailsManager(dataSource);
+
+        //define query to retrieve a user by username
+        // we're telling Spring Security: hey this is how you find my custom tables,
+        // this is the query that you should use
+        // and, also, these are the column names that you should use
+        jdbcUserDetailsManager.setUsersByUsernameQuery(
+                "select user_id, pw, active from members where user_id=?");
+
+        //define query to retrieve the authorities/roles by username
+        jdbcUserDetailsManager.setAuthoritiesByUsernameQuery(
+                "select user_id, role from roles where user_id=?");
+
+        return jdbcUserDetailsManager;
     }
 
     @Bean
